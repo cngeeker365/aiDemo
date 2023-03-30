@@ -1,24 +1,29 @@
-import openai
-import requests
-from requests.structures import CaseInsensitiveDict
-import json
+import cv2
+import easyocr
 
-openai.api_key = "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"
+# 创建 OCR reader
+reader = easyocr.Reader(['ch_sim', 'en'])  # 使用简体中文和英文识别
 
-model = "image-alpha-001"
-img_url = "https://x0.ifengimg.com/ucms/2021_12/18AB799AA136B5129D7D73A4C4E0ED8BE12A8091_size107_w1080_h810.jpg"
-prompt = "这是一张医疗检验报告单，帮我提取报告中每一行数据的项目名称、结果、参考区间"
+# 读取图片
+image_path = "./health.jpeg"
+img = cv2.imread(image_path)
 
-response = openai.Completion.create(
-    engine=model,
-    prompt=prompt,
-    max_tokens=1024,
-    inputs={
-        "image": [img_url],
-    },
-    output_format="json"
-)
+# 转换为灰度图像
+gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-output_url = response["choices"][0]["text"].strip()
-response = requests.get(output_url)
+# 应用二值化处理
+threshold_img = cv2.threshold(gray_img, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+
+# 使用 OCR 识别文本
+result = reader.readtext(threshold_img)
+
+# 提取识别结果的文本部分
+text = "\n".join([item[1] for item in result])
+
+print("识别结果：")
+print(text)
+
+
+
+
 
