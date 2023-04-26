@@ -1,6 +1,6 @@
 import openai
 
-openai.api_key = "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"
+openai.api_key = "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"
 
 prompt = "今天天气如何？"
 model = "text-davinci-002"
